@@ -1,0 +1,136 @@
+{
+  "entities": {
+    "News": {
+      "title": "Notizie Istituzionali",
+      "description": "Notizie e avvisi pubblicati dal Comune.",
+      "type": "object",
+      "properties": {
+        "titolo": { "type": "string" },
+        "categoria": { "type": "string" },
+        "descrizione_breve": { "type": "string" },
+        "descrizione_lunga": { "type": "string" },
+        "immagine_url": { "type": "string" },
+        "data": { "type": "string", "format": "date-time" },
+        "evidenza": { "type": "boolean" },
+        "views": { "type": "number" },
+        "likes": { "type": "number" }
+      },
+      "required": ["titolo", "descrizione_lunga", "data"]
+    },
+    "Report": {
+      "title": "Segnalazione BGS",
+      "description": "Istanza di segnalazione criticità territoriale.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "protocol": { "type": "string", "description": "Formato: NAR-YYYY-NNNNN" },
+        "nome": { "type": "string" },
+        "cognome": { "type": "string" },
+        "codiceFiscale": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "luogoSegnalazioneVia": { "type": "string" },
+        "descrizione": { "type": "string" },
+        "priorita": { "type": "string", "enum": ["alta", "media", "bassa"] },
+        "status": { "type": "string" },
+        "responsabile": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "coordinate": { "type": "string" }
+      }
+    },
+    "Signature": {
+      "title": "Sottoscrizione Istanza Civica",
+      "description": "Firma e validazione di una petizione o istanza popolare.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "petitionId": { "type": "number" },
+        "protocol": { "type": "string", "description": "Formato: NAR-YYYY-NNNNN" },
+        "nome": { "type": "string" },
+        "cognome": { "type": "string" },
+        "cf": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "date": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Like": {
+      "title": "News Like",
+      "description": "Like a una notizia, per utente.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "newsId": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["newsId", "userId"]
+    },
+    "Comment": {
+      "title": "News Comment",
+      "description": "Commento a una notizia.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "newsId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userId": { "type": "string" },
+        "textContent": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["newsId", "userName", "userId", "textContent", "createdAt"]
+    },
+    "User": {
+      "title": "Profilo Cittadino",
+      "description": "Anagrafe digitale del cittadino certificata.",
+      "type": "object",
+      "properties": {
+        "cf": { "type": "string" },
+        "nome": { "type": "string" },
+        "cognome": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "lastLogin": { "type": "string", "format": "date-time" }
+      }
+    },
+    "AuditLog": {
+      "title": "Audit Log di Sistema",
+      "description": "Tracciabilità delle azioni amministrative e civiche.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "action": { "type": "string" },
+        "entityType": { "type": "string" },
+        "entityId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "metadata": { "type": "object" }
+      }
+    }
+  },
+  "firestore": {
+    "/news/{newsId}": {
+      "schema": "News",
+      "description": "Collezione delle notizie comunali."
+    },
+    "/reports/{reportId}": {
+      "schema": "Report",
+      "description": "Segnalazioni dei cittadini con protocollo BGS."
+    },
+    "/signatures/{sigId}": {
+      "schema": "Signature",
+      "description": "Registrazioni delle firme alle istanze civiche."
+    },
+    "/news_likes/{likeId}": {
+      "schema": "Like",
+      "description": "Like per riga (utente/notizia)."
+    },
+    "/news_comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Commenti alle notizie."
+    },
+    "/users/{cf}": {
+      "schema": "User",
+      "description": "Profili anagrafici dei cittadini registrati."
+    },
+    "/audit_logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Registro delle attività di sistema."
+    }
+  }
+}

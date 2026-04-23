@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+@theme {
+  --color-naro-gold: #C5A059;
+  --color-naro-navy: #003366;
+  --color-naro-vivid-gold: #D4AF37;
+  --color-naro-vivid-blue: #004B93;
+  --color-naro-accent: #E5B75D;
+  
+  --background-image-vivid-gradient: linear-gradient(135deg, var(--color-naro-navy) 0%, var(--color-naro-vivid-blue) 100%);
+  --background-image-gold-gradient: linear-gradient(135deg, var(--color-naro-gold) 0%, var(--color-naro-vivid-gold) 100%);
+  
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+}
+
+@layer base {
+  body {
+    @apply min-h-screen overflow-x-hidden;
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 5px #C5A059, 0 0 10px #C5A059; }
+  to { box-shadow: 0 0 20px #E5B75D, 0 0 30px #E5B75D; }
+}
+
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-morphism-dark {
+  background: rgba(0, 51, 102, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.text-gradient-gold {
+  background: linear-gradient(to right, #C5A059, #E5B75D);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Modalità Alta Legibilità */
+.high-contrast {
+  --color-slate-50: #000000;
+  --color-slate-100: #111111;
+  --color-slate-200: #ffffff;
+  --color-slate-300: #ffffff;
+  --color-slate-400: #ffff00;
+  --color-slate-500: #ffff00;
+  --color-slate-600: #ffffff;
+  --color-slate-700: #ffffff;
+  --color-slate-800: #ffffff;
+  --color-slate-900: #ffffff;
+  --color-naro-navy: #000000;
+  --color-naro-gold: #ffff00;
+  
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast * {
+  border-color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.high-contrast .bg-white,
+.high-contrast .bg-slate-50 {
+  background-color: #000000 !important;
+}
+
+.high-contrast .text-slate-600,
+.high-contrast .text-slate-500,
+.high-contrast .text-slate-400 {
+  color: #ffff00 !important;
+}
+
+.high-contrast button,
+.high-contrast a {
+  background-color: #000000 !important;
+  color: #ffff00 !important;
+  border: 2px solid #ffff00 !important;
+  outline: 2px solid #ffff00 !important;
+}
+
+.high-contrast input,
+.high-contrast textarea {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+

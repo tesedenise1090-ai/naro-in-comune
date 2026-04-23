@@ -1,0 +1,5 @@
+{
+  "name": "Remix: NaroInComune",
+  "description": "Piattaforma Civic Tech & Utility con Audit Trail immutabile, Trasparenza Open Data e gestione criticità (Standard BGS-2026) per il Comune di Naro.",
+  "requestFramePermissions": ["geolocation", "microphone"]
+}

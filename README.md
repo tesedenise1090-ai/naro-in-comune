@@ -1,11 +1,43 @@
-<div align="center">
+# NaroInComune
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+**Piattaforma Civic Tech & Utility per la Pubblica Amministrazione e la Protezione Civile.**
 
-  <h1>Built with AI Studio</h2>
+## 🚀 Panoramica del Progetto
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+NaroInComune è un'applicazione web progettata per facilitare la comunicazione e i servizi tra i cittadini e le istituzioni locali.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+### Stack Tecnologico
+- **Frontend**: React, Tailwind CSS, Motion
+- **Mappe**: Leaflet, React-Leaflet
+- **Backend**: Express.js
+- **Database**: SQLite (via better-sqlite3)
+- **AI Integration**: Google Gemini API
 
-</div>
+## 🛠 Installazione e Avvio
+
+1.  **Installare le dipendenze**:
+    ```bash
+    npm install
+    ```
+
+2.  **Avviare il server di sviluppo**:
+    ```bash
+    npm run dev
+    ```
+    L'applicazione sarà disponibile su `http://localhost:3000`.
+
+## ♿ Accessibilità (Skill Integrata)
+
+Abbiamo integrato la skill **Accessibility Compliance Audit** per garantire che la piattaforma sia inclusiva e conforme alle normative vigenti per la PA.
+
+- **Documentazione**: Vedi `docs/accessibility/README.md`
+- **Playbook**: Vedi `docs/accessibility/playbook.md` per le procedure di audit.
+- **Audit Rapido**: Esegui `npx pa11y http://localhost:3000` per un controllo veloce.
+
+## 📚 Skill Disponibili
+
+Il progetto include un catalogo di skill AI pronte all'uso nella cartella `skills/`.
+Vedi `SKILLS_LIST.md` per l'elenco completo.
+
+---
+*Progetto sviluppato con il supporto di Antigravity Skills.*
