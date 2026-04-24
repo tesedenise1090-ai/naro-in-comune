@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import { Zap, Droplets, Trash2, Coins, Phone, Calculator, Calendar, FileText, X, Check, ExternalLink, Lightbulb, Landmark, ShieldCheck, Info, ArrowRight, AlertTriangle, Download, ArrowLeft, Globe, Leaf, Box, Newspaper, Wine, Settings, Save, Edit2, LayoutGrid } from 'lucide-react';
 import BackToTop from './BackToTop';
 import BackButton from './BackButton';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { WASTE_SCHEDULE } from '../lib/wasteSchedule';
+import { calendarioRifiuti } from '../calendarioData';
 
 interface UtilityTabProps {
   isAdmin?: boolean;
@@ -20,18 +21,46 @@ export function UtilityTab({ isAdmin = false }: UtilityTabProps) {
     setTimeout(() => {
        const doc = new jsPDF();
        doc.setFontSize(18);
-       doc.text('Calendario Raccolta Differenziata - Naro 2026', 14, 15);
-       const tableData = Object.values(WASTE_SCHEDULE).map((s: any) => [
+       doc.text('Calendario Raccolta Differenziata - Comune di Naro', 14, 15);
+       doc.setFontSize(10);
+       doc.text('Gestore: Roma Costruzioni SRL', 14, 22);
+
+       const tableData = calendarioRifiuti.map((s: any) => [
           s.day,
-          s.materials.join(', ')
+          s.type
        ]);
-       (doc as any).autoTable({
+       
+       autoTable(doc, {
           head: [['Giorno', 'Materiali da Conferire']],
           body: tableData,
-          startY: 25,
-          styles: { fontSize: 10 },
-          headStyles: { fillColor: [22, 60, 107] },
+          startY: 30,
+          styles: { fontSize: 10, cellPadding: 3 },
+          headStyles: { fillColor: [22, 60, 107], textColor: [255, 255, 255] },
+          didParseCell: (data) => {
+             if (data.section === 'body') {
+                const type = data.row.cells[1].raw as string;
+                if (type.includes('Organico (Umido)')) {
+                    data.cell.styles.fillColor = [209, 250, 229]; // Emerald 100
+                } else if (type.includes('RSU (Indifferenziata)')) {
+                    data.cell.styles.fillColor = [226, 232, 240]; // Slate 200
+                } else if (type.includes('Organico + Vetro')) {
+                    data.cell.styles.fillColor = [153, 246, 228]; // Teal 200 (a bit darker for readability)
+                } else if (type.includes('Plastica + Alluminio')) {
+                    data.cell.styles.fillColor = [254, 240, 138]; // Yellow 200
+                } else if (type.includes('Carta e Cartone')) {
+                    data.cell.styles.fillColor = [191, 219, 254]; // Blue 200
+                } else if (type.includes('Nessun Ritiro')) {
+                    data.cell.styles.fillColor = [254, 202, 202]; // Red 200
+                }
+             }
+          }
        });
+
+       doc.setFontSize(8);
+       doc.setTextColor(220, 38, 38);
+       doc.text('ATTENZIONE: È severamente vietato l\'uso di sacchi neri per il conferimento dell\'organico.', 14, (doc as any).lastAutoTable.finalY + 10);
+       doc.setTextColor(50, 50, 50);
+       doc.text('NOTA: Controlla sempre il portale per eventuali variazioni nei giorni festivi.', 14, (doc as any).lastAutoTable.finalY + 14);
        
        // Force download strategy
        const blob = doc.output('blob');
@@ -61,23 +90,15 @@ export function UtilityTab({ isAdmin = false }: UtilityTabProps) {
   
   // Waste Calendar State
   const [isEditingCalendar, setIsEditingCalendar] = useState(false);
-  const [calendarData, setCalendarData] = useState([
-    { day: 'Lunedì', type: 'Umido', color: 'bg-brown-100 text-brown-800' },
-    { day: 'Martedì', type: 'Plastica', color: 'bg-yellow-100 text-yellow-800' },
-    { day: 'Mercoledì', type: 'Carta', color: 'bg-blue-100 text-blue-800' },
-    { day: 'Giovedì', type: 'Umido', color: 'bg-brown-100 text-brown-800' },
-    { day: 'Venerdì', type: 'Secco Residuo', color: 'bg-gray-100 text-gray-800' },
-    { day: 'Sabato', type: 'Vetro/Lattine', color: 'bg-green-100 text-green-800' },
-    { day: 'Domenica', type: '-', color: 'bg-slate-50 text-slate-400' },
-  ]);
+  const [calendarData, setCalendarData] = useState(calendarioRifiuti);
 
   const wasteTypes = [
-    { type: 'Umido', color: 'bg-[#fdf6e3] text-[#8c6b1f]', icon: Leaf },
-    { type: 'Plastica', color: 'bg-[#fdf3c6] text-[#96700b]', icon: Box },
-    { type: 'Carta', color: 'bg-[#dbeafe] text-[#1e40af]', icon: Newspaper },
-    { type: 'Secco Residuo', color: 'bg-[#f1f5f9] text-[#334155]', icon: Trash2 },
-    { type: 'Vetro/Lattine', color: 'bg-[#dcfce7] text-[#166534]', icon: Wine },
-    { type: '-', color: 'bg-[#f8fafc] text-slate-400', icon: X },
+    { type: 'Organico', color: 'bg-emerald-100 text-emerald-800', icon: Leaf },
+    { type: 'Plastica/Metalli', color: 'bg-yellow-100 text-yellow-800', icon: Box },
+    { type: 'Carta/Cartone', color: 'bg-blue-100 text-blue-800', icon: Newspaper },
+    { type: 'Indifferenziata', color: 'bg-slate-200 text-slate-800', icon: Trash2 },
+    { type: 'Organico/Vetro', color: 'bg-teal-100 text-teal-800', icon: Wine },
+    { type: 'Nessun Ritiro', color: 'bg-red-100 text-red-800', icon: X },
   ];
 
   const handleCalendarChange = (index: number, newType: string) => {
@@ -136,6 +157,9 @@ export function UtilityTab({ isAdmin = false }: UtilityTabProps) {
           </h1>
           <p className="text-slate-600 text-lg max-w-2xl mx-auto">
             Il punto di accesso unico per tutti i servizi di pubblica utilità. Gestisci le tue utenze, calcola i tributi e accedi agli strumenti digitali.
+          </p>
+          <p className="mt-4 p-4 bg-amber-50 text-amber-800 rounded-xl text-sm border border-amber-200 inline-block text-left">
+            💡 Nota: Il calendario viene monitorato e aggiornato costantemente in base alle disposizioni ufficiali di Roma Costruzioni SRL per il Comune di Naro. In occasione di festività, il sistema indicherà automaticamente la sospensione.
           </p>
           <p className="text-[#C5A059] font-serif italic mt-4 text-sm tracking-wide">"Partecipare è un dovere, digitale è un diritto"</p>
         </div>
@@ -427,10 +451,14 @@ export function UtilityTab({ isAdmin = false }: UtilityTabProps) {
             </div>
             <h3 className="text-2xl font-bold text-slate-900 mb-3">Rifiuti</h3>
             <p className="text-slate-500 mb-6">Calendario raccolta differenziata, ritiro ingombranti e isole ecologiche.</p>
-            <button onClick={() => setActiveModal('waste')} className="w-full py-3 bg-[#1a1a1a] text-white rounded-xl font-bold hover:bg-black transition-all shadow-sm flex items-center justify-center">
+            <button onClick={() => setActiveModal('waste')} className="w-full py-3 bg-[#1a1a1a] text-white rounded-xl font-bold hover:bg-black transition-all shadow-sm flex items-center justify-center mb-4">
               <Calendar className="w-5 h-5 mr-2 text-[#C5A059]" /> Calendario Raccolta
             </button>
+            <a href="https://www.facebook.com/profile.php?id=100057035126727" target="_blank" rel="noopener noreferrer" className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-sm flex items-center justify-center">
+              <Globe className="w-5 h-5 mr-2" /> Avvisi su Facebook
+            </a>
           </div>
+[diff_block_end]
         </div>
 
         {/* Strumenti Rapidi & Supporto */}
@@ -484,7 +512,7 @@ export function UtilityTab({ isAdmin = false }: UtilityTabProps) {
                 <a href="mailto:tributi@comune.naro.ag.it" className="flex items-center justify-center w-full py-3 bg-[#C5A059] text-[#003366] rounded-xl font-bold hover:bg-[#b08d45] transition-colors">
                   Invia Email
                 </a>
-                <a href="tel:0922953011" className="flex items-center justify-center w-full py-3 bg-transparent text-white rounded-xl font-bold hover:bg-white/10 transition-colors border border-white/20">
+                <a href="tel:+393505096789" className="flex items-center justify-center w-full py-3 bg-transparent text-white rounded-xl font-bold hover:bg-white/10 transition-colors border border-white/20">
                   Chiama Ufficio
                 </a>
               </div>
@@ -497,8 +525,8 @@ export function UtilityTab({ isAdmin = false }: UtilityTabProps) {
       {/* Modals */}
       {activeModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className={`bg-white rounded-2xl shadow-xl w-full overflow-hidden animate-in zoom-in-95 duration-200 ${activeModal === 'waste' ? 'max-w-5xl' : 'max-w-2xl'}`}>
-            <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+            <div className={`bg-white rounded-2xl shadow-xl w-full max-h-[90vh] overflow-y-auto z-[999] relative animate-in zoom-in-95 duration-200 ${activeModal === 'waste' ? 'max-w-5xl' : 'max-w-2xl'}`}>
+            <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center sticky top-0 z-10">
               <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
                 {activeModal === 'tari' && 'Simulatore TARI'}
                 {activeModal === 'waste' && <><Trash2 className="w-5 h-5" /> Calendario Raccolta Differenziata</>}
@@ -530,44 +558,32 @@ export function UtilityTab({ isAdmin = false }: UtilityTabProps) {
                     </p>
                   </div>
                   
+
                     <div id="sezione-rifiuti-completa" className="overflow-x-auto pb-4 -mx-2 px-2">
                     <div className="flex gap-4 min-w-max">
                       {calendarData.map((item, idx) => {
-                        // Determine pill colors based on type
-                        let pillBg = 'bg-slate-100';
-                        let pillText = 'text-slate-600';
-                        let barColor = 'bg-slate-300';
-                        
-                        const typeConfig = wasteTypes.find(t => t.type === item.type);
-                        if (typeConfig) {
-                          // Extract color classes manually or use the config directly if possible
-                          // For simplicity, we'll use the config directly for the card styling
-                        }
+                        const Icon = (({ Leaf, Trash2, Wine, Box, Newspaper, X }) => {
+                          const icons: any = { Leaf, Trash2, Wine, Box, Newspaper, X };
+                          return icons[item.icon as any] || Trash2;
+                        })({ Leaf, Trash2, Wine, Box, Newspaper, X });
 
                         return (
-                          <div key={idx} className="flex flex-col items-center p-4 rounded-xl border border-slate-200 bg-white w-40 shrink-0 shadow-sm hover:shadow-md transition-all">
-                            <span className="font-bold text-slate-800 text-lg mb-1">{item.day}</span>
-                            <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-3">Entro le 06:00</span>
+                          <div key={idx} className="flex flex-col items-center p-6 rounded-3xl border border-slate-200 bg-white w-56 shrink-0 shadow-lg hover:shadow-xl transition-all">
+                            <span className="font-black text-slate-800 text-xl mb-1 uppercase tracking-tight">{item.day}</span>
+                            <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-4">Entro le 06:00</span>
                             
-                            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${item.color.split(' ')[0]}`}>
-                              {getWasteIcon(item.type)}
+                            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-4 ${item.color.split(' ')[0]}`}>
+                              <Icon className="w-10 h-10" />
                             </div>
 
-                            {isEditingCalendar ? (
-                              <select 
-                                value={item.type}
-                                onChange={(e) => handleCalendarChange(idx, e.target.value)}
-                                className="w-full text-xs p-1 border rounded bg-slate-50 font-bold text-center"
-                              >
-                                {wasteTypes.map(t => (
-                                  <option key={t.type} value={t.type}>{t.type}</option>
-                                ))}
-                              </select>
-                            ) : (
-                              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-center w-full truncate ${item.color}`}>
-                                {item.type}
-                              </span>
-                            )}
+                            <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider text-center w-full mb-4 ${item.color}`}>
+                              {item.type}
+                            </span>
+                            
+                            <div className="w-full text-left text-[10px] text-slate-600 space-y-2">
+                                {item.dos.length > 0 && <div><strong className="text-emerald-700">SÌ:</strong> {item.dos.join(', ')}</div>}
+                                {item.donts.length > 0 && <div><strong className="text-red-700">NO:</strong> {item.donts.join(', ')}</div>}
+                            </div>
                           </div>
                         );
                       })}
@@ -590,10 +606,24 @@ export function UtilityTab({ isAdmin = false }: UtilityTabProps) {
                         <h5 className="font-bold text-slate-700">🚛 Ingombranti e Sfalci</h5>
                         <p className="text-sm text-slate-600">Non esporre con i mastelli. Richiedi il ritiro gratuito:</p>
                         <div className="flex gap-2">
-                          <a href="tel:0922953011" className="text-xs px-3 py-1 bg-white border border-slate-300 rounded-lg text-slate-700 hover:border-blue-500 shadow-sm">Chiama Numero Dedicato</a>
+                          <a href="tel:+393505096789" className="text-xs px-3 py-1 bg-white border border-slate-300 rounded-lg text-slate-700 hover:border-blue-500 shadow-sm">Chiama Numero Dedicato</a>
                           <span className="text-xs text-slate-500 pt-1">o CCR Contrada Margonia</span>
                         </div>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Facebook Alert Banner */}
+                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-4">
+                    <div className="p-2 bg-blue-600 rounded-lg shrink-0">
+                      <Globe className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h5 className="font-black text-blue-900 mb-1">Avvisi Live (Roma Costruzioni)</h5>
+                      <p className="text-sm text-blue-800 mb-3">Controlla sempre la bacheca ufficiale per eventuali variazioni straordinarie nei giorni festivi o emergenze.</p>
+                      <a href="https://www.facebook.com/profile.php?id=100057035126727" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-blue-900 underline">
+                        Vai alla pagina Facebook Ufficiale →
+                      </a>
                     </div>
                   </div>
 

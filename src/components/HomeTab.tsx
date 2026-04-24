@@ -67,7 +67,7 @@ export function HomeTab({ navigate, news, onRefresh }: HomeTabProps) {
 
       {/* Live Update Banner */}
       <div className="bg-red-600 text-white py-2 px-4 text-center text-xs font-bold uppercase tracking-widest shadow-lg z-50">
-         <span className="animate-pulse mr-2">LIVE:</span> Roma Costruzioni Comunica: Servizio Regolare. Eventuali variazioni festività saranno aggiornate qui.
+         <span className="animate-pulse mr-2">LIVE:</span> Roma Costruzioni & Comune di Naro: Monitoraggio costante. Nota: Il calendario viene aggiornato in base alle disposizioni ufficiali. Eventuali festività gestite automaticamente.
       </div>
       
       {/* Immersive Image Hero Section */}

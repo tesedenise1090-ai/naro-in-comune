@@ -16,13 +16,15 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 import { 
-  TrendingUp, Users, Activity, CheckCircle, Clock, Map as MapIcon, 
+  TrendingUp, Users, Activity, CheckCircle, Clock, Map as MapIcon, AlertTriangle,
   Download, Filter, Calendar, LayoutDashboard, Database, FileText
 } from 'lucide-react';
 import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { PDFService } from '../services/pdfService';
 import { StorageService } from '../services/storage';
+
+import { SegnalazioniList } from './SegnalazioniList';
 
 interface OpenDataProps {
   reports: any[];
@@ -157,6 +159,30 @@ export function OpenDataDashboard({ reports }: OpenDataProps) {
             </motion.div>
           ))}
         </div>
+
+        {/* High Priority Alerts Section */}
+        <div className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 mb-12">
+            <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
+               <AlertTriangle className="w-6 h-6 text-red-600" /> Segnalazioni Critiche / Alta Priorità
+            </h3>
+            <div className="space-y-4">
+              {reports.filter(r => r.priorita === 'alta').length > 0 ? (
+                reports.filter(r => r.priorita === 'alta').map((r, idx) => (
+                  <div key={idx} className="flex justify-between items-center p-4 bg-red-50 border border-red-100 rounded-2xl">
+                    <div>
+                      <p className="font-bold text-red-900">{r.tipoGuasto}</p>
+                      <p className="text-xs text-red-700">{r.ubicazione}</p>
+                    </div>
+                    <span className="px-3 py-1 bg-red-600 text-white text-[10px] font-black rounded-lg uppercase">Priorità Alta</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-slate-500 italic">Nessuna segnalazione critica al momento.</p>
+              )}
+            </div>
+        </div>
+
+        <SegnalazioniList reports={reports} />
 
         {/* Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">

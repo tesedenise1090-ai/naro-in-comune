@@ -9,7 +9,6 @@ import { useVoiceCommand } from './hooks/useVoiceCommand';
 import { AIAssistant } from './components/AIAssistant';
 import { Footer } from './components/Footer';
 import { LoginPortal } from './components/LoginPortal';
-import { FullscreenToggle } from './components/FullscreenToggle';
 
 // Lazy load components for better performance
 const HomeTab = React.lazy(() => import('./components/HomeTab').then(module => ({ default: module.HomeTab })));
@@ -30,9 +29,7 @@ const Immutabili = React.lazy(() => import('./components/Immutabili').then(modul
 const UsefulNumbers = React.lazy(() => import('./components/UsefulNumbers').then(module => ({ default: module.UsefulNumbers })));
 const Regulations = React.lazy(() => import('./components/Regulations').then(module => ({ default: module.Regulations })));
 const TrackReporting = React.lazy(() => import('./components/TrackReporting').then(module => ({ default: module.TrackReporting })));
-const OpenDataDashboard = React.lazy(() => import('./components/OpenDataDashboard').then(module => ({ default: module.OpenDataDashboard })));
 const TrasparenzaTab = React.lazy(() => import('./components/TrasparenzaTab'));
-
 function AppContent() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -161,57 +158,64 @@ function AppContent() {
       </Helmet>
 
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-md text-slate-800 shadow-sm sticky top-0 z-50 border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link to="/" className="flex items-center cursor-pointer" onClick={closeMobileMenu} aria-label="NaroInComune - Torna alla Home">
-              <ShieldAlert className="h-8 w-8 text-naro-navy mr-3" aria-hidden="true" />
-              <span className="font-bold text-xl tracking-tight text-slate-900">Naro<span className="text-naro-navy">InComune</span></span>
-            </Link>
-            
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex space-x-6 items-center">
-              <button 
+      <header className="bg-white text-slate-800 shadow-md sticky top-0 z-50 border-b border-slate-200">
+        {/* Accessibility Top Bar */}
+        <div className="bg-slate-100 border-b border-slate-200 text-xs py-1">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-end gap-4">
+             <button
                 onClick={() => {
                   if (!voiceAssistantActive) {
                     startGlobalVoice();
                     setVoiceAssistantActive(true);
                   }
-                }} 
-                className={`p-2 rounded-lg transition-all flex items-center gap-1 text-xs font-bold ${voiceAssistantActive ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                title="Attiva Assistente Vocale (Dì 'Emergenza' o 'Home')"
+                }}
+                className={`flex items-center gap-1 font-bold ${voiceAssistantActive ? 'text-red-600 animate-pulse' : 'text-slate-600 hover:text-naro-navy'}`}
               >
-                <Mic className={`w-4 h-4 ${voiceAssistantActive ? 'fill-current' : ''}`} />
-                {voiceAssistantActive ? 'Ascolto...' : 'Voce'}
+                <Mic className="w-3 h-3" /> {voiceAssistantActive ? 'In Ascolto...' : 'Assistente Vocale'}
               </button>
-              <button 
-                onClick={() => setIsHighContrast(!isHighContrast)} 
-                className={`p-2 rounded-lg transition-all flex items-center gap-1 text-xs font-bold ${isHighContrast ? 'bg-naro-gold text-naro-navy' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                title="Attiva Alta Legibilità (Accessibilità)"
+              <button
+                onClick={() => setIsHighContrast(!isHighContrast)}
+                className="flex items-center gap-1 font-bold text-slate-600 hover:text-naro-navy"
               >
-                <Accessibility className="w-4 h-4" />
-                {isHighContrast ? 'Luce' : 'Contrasto'}
+                <Accessibility className="w-3 h-3" /> {isHighContrast ? 'Disattiva Contrasto' : 'Alta Legibilità'}
               </button>
-              <Link to="/" className={`hover:text-naro-navy font-medium transition-colors ${isActive('/') ? 'text-naro-navy' : 'text-slate-600'}`}>Home</Link>
-              <Link to="/utility" className={`hover:text-naro-navy font-medium transition-colors ${isActive('/utility') ? 'text-naro-navy' : 'text-slate-600'}`}>Hub Utility</Link>
-              <Link to="/territorio" className={`hover:text-naro-navy font-medium transition-colors ${isActive('/territorio') ? 'text-naro-navy' : 'text-slate-600'}`}>Territorio</Link>
-              <Link to="/petizioni" className={`hover:text-naro-navy font-medium transition-colors ${isActive('/petizioni') ? 'text-naro-navy' : 'text-slate-600'}`}>Istanze Civiche</Link>
-              <Link to="/trasparenza" className={`hover:text-naro-navy font-medium transition-colors ${isActive('/trasparenza') ? 'text-naro-navy' : 'text-slate-600'}`}>Trasparenza</Link>
-              <Link to="/numeri-utili" className={`hover:text-naro-navy font-medium transition-colors ${isActive('/numeri-utili') ? 'text-naro-navy' : 'text-slate-600'}`}>Numeri Utili</Link>
-              <Link to="/normative" className={`hover:text-naro-navy font-medium transition-colors ${isActive('/normative') ? 'text-naro-navy' : 'text-slate-600'}`}>Normative</Link>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            <Link to="/" className="flex items-center cursor-pointer" onClick={closeMobileMenu}>
+              <ShieldAlert className="h-8 w-8 text-naro-navy mr-3" />
+              <span className="font-bold text-xl tracking-tight text-slate-900">Naro<span className="text-naro-navy">InComune</span></span>
+            </Link>
+
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex space-x-8 items-center font-bold text-slate-700">
+              <Link to="/" className={`hover:text-naro-navy transition-colors ${isActive('/')}`}>Home</Link>
+              <Link to="/utility" className={`hover:text-naro-navy transition-colors ${isActive('/utility')}`}>Hub Utility</Link>
+              <Link to="/utility#sezione-rifiuti-completa" className="text-emerald-700 hover:text-emerald-800 flex items-center gap-1">♻️ Rifiuti</Link>
               
-              <div className="flex items-center space-x-2">
-                <FullscreenToggle />
-                <Link to="/segnalazione-guasti" className="group relative px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-all shadow-sm flex items-center text-sm overflow-hidden">
-                  <div className="absolute top-0 right-0 h-full w-4 bg-white/20 skew-x-12 translate-x-12 group-hover:-translate-x-32 transition-transform duration-700"></div>
-                  <ShieldAlert className="w-4 h-4 mr-2" />
-                  <span className="relative">Segnala Criticità</span>
-                  <span className="ml-2 px-1.5 py-0.5 bg-white/20 rounded-md text-[8px] font-black tracking-tighter">BGS-2026</span>
-                </Link>
+              {/* Dropdown Servizi */}
+              <div className="relative group">
+                <button className="flex items-center gap-1 hover:text-naro-navy transition-colors">Servizi ▾</button>
+                <div className="absolute top-full left-0 w-48 bg-white border border-slate-200 shadow-xl rounded-lg hidden group-hover:block py-2">
+                  <Link to="/territorio" className="block px-4 py-2 hover:bg-slate-50 text-slate-700">Territorio</Link>
+                  <Link to="/petizioni" className="block px-4 py-2 hover:bg-slate-50 text-slate-700">Istanze Civiche</Link>
+                  <Link to="/trasparenza" className="block px-4 py-2 hover:bg-slate-50 text-slate-700">Trasparenza</Link>
+                  <Link to="/normative" className="block px-4 py-2 hover:bg-slate-50 text-slate-700">Normative</Link>
+                </div>
               </div>
 
-              <button 
-                onClick={handleAdminToggle} 
+              <Link to="/numeri-utili" className={`hover:text-naro-navy transition-colors ${isActive('/numeri-utili')}`}>Numeri Utili</Link>
+              
+              <div className="h-6 w-px bg-slate-300"></div>
+
+              <Link to="/segnalazione-guasti" className="px-5 py-2.5 bg-red-600 text-white rounded-xl font-black hover:bg-red-700 transition-all shadow-lg shadow-red-200 flex items-center text-sm">
+                <ShieldAlert className="w-4 h-4 mr-2" /> Segnala Criticità
+              </Link>
+
+              <button
+                onClick={handleAdminToggle}
                 className={`px-4 py-2 rounded-lg text-sm font-bold border transition-colors ${isAdmin ? 'bg-naro-gold text-naro-navy border-naro-gold hover:opacity-90' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'}`}
               >
                 {isAdmin ? 'Esci Admin' : 'Area Admin'}
@@ -237,27 +241,23 @@ function AppContent() {
               >
                 <Accessibility className="w-5 h-5" />
               </button>
-              <FullscreenToggle />
               <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-slate-600 hover:text-naro-navy">
                 {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
           </div>
         </div>
-
-        {/* Mobile Nav */}
+        {/* Mobile Nav is placed here */}
         {isMobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-slate-200 shadow-lg">
             <div className="px-4 pt-2 pb-4 space-y-2">
               <Link to="/" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-naro-navy">Home</Link>
               <Link to="/utility" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-naro-navy">Hub Utility</Link>
-              <Link to="/calcolo-imu" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-naro-navy">Calcolo IMU</Link>
-              <Link to="/tari-timeline" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-naro-navy">TARI</Link>
-              <Link to="/canone-unico" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-naro-navy">Canone Unico</Link>
+              <Link to="/utility#sezione-rifiuti-completa" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800">♻️ Rifiuti</Link>
               <Link to="/territorio" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-naro-navy">Territorio</Link>
               <Link to="/petizioni" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-naro-navy">Istanze Civiche</Link>
               <Link to="/trasparenza" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-naro-navy">Trasparenza</Link>
-              <Link to="/numeri-utili" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-naro-navy">Numeri Utili</Link>
+              <Link to="/utility" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-naro-navy">Numeri Utili</Link>
               <Link to="/normative" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-naro-navy">Normative & Leggi</Link>
               <Link to="/segnalazione-guasti" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-bold text-red-600 bg-red-50 hover:bg-red-100">
                 Segnala Criticità
@@ -358,12 +358,7 @@ function AppContent() {
                 <TrackReporting />
               </>
             } />
-            <Route path="/opendata" element={
-              <>
-                <Helmet><title>Open Data & Trasparenza - NaroInComune</title></Helmet>
-                <OpenDataDashboard reports={reports} />
-              </>
-            } />
+
             <Route path="/petizioni" element={
               <>
                 <Helmet><title>Istanze Civiche - NaroInComune</title></Helmet>
