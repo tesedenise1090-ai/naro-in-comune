@@ -232,27 +232,6 @@ export function LoginPortal({ onLogin }: LoginPortalProps) {
                 <p className="text-center text-xs text-white/40">
                   Non hai un account? <button type="button" onClick={() => setView('register')} className="text-naro-gold font-bold hover:underline">Registrati ora</button>
                 </p>
-
-                {/* PA Digital Identity Gateway */}
-                <div className="pt-6 border-t border-white/5 space-y-3">
-                  <p className="text-[10px] text-center text-white/30 font-black uppercase tracking-widest mb-4">Oppure accedi con Identità Digitale</p>
-                  
-                  <button type="button" className="w-full h-12 bg-white flex items-center justify-between px-6 rounded-xl hover:bg-slate-50 transition-colors group">
-                    <img src="https://www.spid.gov.it/assets/img/logo-spid.svg" alt="Lign with SPID" className="h-6" />
-                    <span className="text-slate-900 font-bold text-xs">Entra con SPID</span>
-                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition-colors" />
-                  </button>
-
-                  <button type="button" className="w-full h-12 bg-[#004e8e] flex items-center justify-between px-6 rounded-xl hover:bg-[#003d70] transition-colors group">
-                    <div className="flex items-center gap-3">
-                      <div className="bg-white p-1 rounded">
-                        <img src="https://www.cartaidentita.interno.gov.it/logo-cie.svg" alt="Login with CIE" className="h-4" />
-                      </div>
-                      <span className="text-white font-bold text-xs">Entra con CIE</span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
-                  </button>
-                </div>
               </motion.form>
             ) : (
               <motion.form 

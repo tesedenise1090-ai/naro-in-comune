@@ -1,7 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 
-const apiKey = process.env.GEMINI_API_KEY || '';
-const ai = new GoogleGenAI({ apiKey });
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  console.error('GEMINI_API_KEY is missing!');
+  // throw new Error('GEMINI_API_KEY is missing');
+}
+const ai = new GoogleGenAI({ apiKey: apiKey || 'placeholder' });
+
 
 export const GeminiService = {
   // Generate a short news article based on a title
