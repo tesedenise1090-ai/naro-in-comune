@@ -72,7 +72,7 @@ export function HomeTab({ navigate, news, onRefresh }: HomeTabProps) {
       
       {/* Immersive Image Hero Section */}
       <div 
-        className="relative h-[85vh] md:h-[75vh] flex items-center justify-center overflow-hidden bg-[url('https://www.siciliafan.it/wp-content/uploads/sites/3/2024/03/Naro-1-1.jpeg')] bg-cover bg-center"
+        className="relative min-h-[400px] h-[85vh] md:h-[75vh] flex items-start md:items-center justify-center overflow-hidden pt-24 md:pt-0 bg-[url('https://www.siciliafan.it/wp-content/uploads/sites/3/2024/03/Naro-1-1.jpeg')] bg-cover bg-center"
       >
         {/* Accessibility/Readability Overlay */}
         <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
