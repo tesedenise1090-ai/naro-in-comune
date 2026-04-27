@@ -127,9 +127,12 @@ export function Tributi() {
                         <span className="font-bold text-slate-900">2 Dicembre</span>
                       </div>
                     </div>
-                    <Link to="/calcolo-tari" className="w-full flex items-center justify-between p-4 bg-[#1a1a1a] text-white rounded-xl font-bold hover:bg-black transition-colors">
-                      <span>Verifica Posizione TARI</span>
-                      <ArrowRight className="w-5 h-5" />
+                    <Link to="/calcolo-tari" className="w-full flex flex-col items-center p-4 bg-[#1a1a1a] text-white rounded-xl font-bold hover:bg-black transition-colors group">
+                      <div className="flex items-center justify-between w-full">
+                        <span>Verifica Posizione TARI</span>
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <p className="text-[10px] text-white/50 mt-2 font-normal">Richiesto Accesso Area Riservata</p>
                     </Link>
                   </div>
                 </div>

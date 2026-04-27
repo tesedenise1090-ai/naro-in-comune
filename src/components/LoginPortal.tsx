@@ -307,8 +307,65 @@ export function LoginPortal({ onLogin }: LoginPortalProps) {
           </AnimatePresence>
         </div>
         
-        <div className="bg-slate-50 p-4 text-center border-t border-slate-100">
-          <p className="text-[9px] text-slate-400 uppercase font-black tracking-[0.2em]">Sessione Protetta da Crittografia AES-256</p>
+        <div className="bg-slate-50 p-8 border-t border-slate-100">
+          <div className="mb-6">
+            <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <ShieldCheck className="w-3 h-3 text-naro-navy" /> Modalità di Accesso al Portale
+            </h3>
+            <div className="space-y-4">
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/60 shadow-sm transition-all hover:shadow-md">
+                <div className="text-[12px] font-bold text-slate-800 leading-none mb-1.5 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500" /> Accesso Libero (Senza Registrazione)
+                </div>
+                <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                  Il portale è liberamente consultabile. Per l'invio di <span className="text-naro-navy font-bold">segnalazioni generiche</span>, non è richiesto un account; è sufficiente inserire i propri dati identificativi (Nome, Cognome ed Email).
+                </p>
+              </div>
+              <div className="bg-white p-4 rounded-2xl border border-slate-200/60 shadow-sm transition-all hover:shadow-md">
+                <div className="text-[12px] font-bold text-slate-800 leading-none mb-1.5 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-naro-gold" /> Area Riservata (Accesso con Credenziali)
+                </div>
+                <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
+                  Per la consultazione di <span className="text-naro-navy font-bold">dati sensibili e servizi personalizzati</span>, come la gestione delle bollette e pratiche private, è necessario effettuare il login.
+                </p>
+              </div>
+              <div className="bg-slate-100/80 p-4 rounded-2xl border border-dashed border-slate-300 shadow-sm">
+                <p className="text-[12px] font-bold text-slate-600 leading-none mb-1.5 flex items-center gap-2">
+                  <ShieldAlert className="w-3.5 h-3.5 text-slate-500" /> Back Office (Gestione Amministrativa)
+                </p>
+                <p className="text-[10px] text-slate-500 leading-relaxed italic">
+                  Sezione riservata esclusivamente al personale autorizzato. Il pannello di controllo è completamente oscurato al pubblico e richiede permessi di sicurezza specifici per la gestione dei contenuti e delle utenze.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-100/50">
+                  <th className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200">Servizio</th>
+                  <th className="px-3 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200">Accesso</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="px-3 py-2 text-[11px] font-bold text-slate-700 border-b border-slate-100">Navigazione e Segnalazioni</td>
+                  <td className="px-3 py-2 text-[11px] text-emerald-600 border-b border-slate-100 font-bold uppercase tracking-tighter text-[9px]">Libero</td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2 text-[11px] font-bold text-slate-700 border-b border-slate-100">Bollette e Dati Privati</td>
+                  <td className="px-3 py-2 text-[11px] text-naro-gold border-b border-slate-100 font-bold uppercase tracking-tighter text-[9px]">Cittadino</td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2 text-[11px] font-bold text-slate-700">Back Office (Admin)</td>
+                  <td className="px-3 py-2 text-[11px] text-slate-400 font-bold uppercase tracking-tighter text-[9px]">Riservato</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p className="text-[9px] text-slate-400 uppercase font-black tracking-[0.2em] pt-6 text-center">Sessione Protetta da Crittografia AES-256</p>
         </div>
       </motion.div>
     </div>

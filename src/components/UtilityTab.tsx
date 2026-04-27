@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Zap, Droplets, Trash2, Coins, Phone, Calculator, Calendar, FileText, X, Check, ExternalLink, Lightbulb, Landmark, ShieldCheck, Info, ArrowRight, AlertTriangle, Download, ArrowLeft, Globe, Leaf, Box, Newspaper, Wine, Settings, Save, Edit2, LayoutGrid } from 'lucide-react';
+import { Zap, Droplets, Trash2, Coins, Phone, Calculator, Calendar, FileText, X, Check, ExternalLink, Lightbulb, Landmark, ShieldCheck, Info, ArrowRight, AlertTriangle, Download, ArrowLeft, Globe, Leaf, Box, Newspaper, Wine, Settings, Save, Edit2, LayoutGrid, Plus, History, CreditCard, Trash } from 'lucide-react';
 import BackToTop from './BackToTop';
 import BackButton from './BackButton';
+import { StorageService } from '../services/storage';
+import { motion, AnimatePresence } from 'framer-motion';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { WASTE_SCHEDULE } from '../lib/wasteSchedule';
@@ -15,6 +17,39 @@ interface UtilityTabProps {
 export function UtilityTab({ isAdmin = false }: UtilityTabProps) {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  // Bills State
+  const [bills, setBills] = useState<any[]>([]);
+  const [showBillForm, setShowBillForm] = useState(false);
+  const [newBill, setNewBill] = useState({ fornitore: '', importo: '', scadenza: '', stato: 'Da Pagare' });
+
+  useEffect(() => {
+    setBills(StorageService.getBills());
+  }, []);
+
+  const handleAddBill = (e: React.FormEvent) => {
+    e.preventDefault();
+    const updatedBills = StorageService.addBill(newBill);
+    setBills(updatedBills);
+    setNewBill({ fornitore: '', importo: '', scadenza: '', stato: 'Da Pagare' });
+    setShowBillForm(false);
+  };
+
+  const handleUpdateStatus = (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'Pagata' ? 'Da Pagare' : 'Pagata';
+    const bill = bills.find(b => b.id === id);
+    if (bill) {
+      const updatedBills = StorageService.updateBill({ ...bill, stato: newStatus });
+      setBills(updatedBills);
+    }
+  };
+
+  const handleDeleteBill = (id: string) => {
+    if (confirm('Sei sicuro di voler eliminare questa bolletta?')) {
+      const updatedBills = StorageService.deleteBill(id);
+      setBills(updatedBills);
+    }
+  };
   
   const handleDownloadPDF = () => {
     setIsDownloading(true);
@@ -518,6 +553,156 @@ export function UtilityTab({ isAdmin = false }: UtilityTabProps) {
               </div>
             </div>
             <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-[#C5A059] rounded-full opacity-10 blur-3xl"></div>
+          </div>
+        </div>
+
+        {/* NUOVA SEZIONE: Gestione Bollette & Scadenze */}
+        <div id="sezione-bollette" className="mt-20 scroll-mt-24">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+            <div>
+              <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter flex items-center gap-3">
+                <CreditCard className="w-8 h-8 text-[#C5A059]" />
+                Bollette & Scadenze
+              </h2>
+              <p className="text-slate-500 font-medium">Digitalizza le tue spese e attiva gli alert automatici.</p>
+            </div>
+            <button 
+              onClick={() => setShowBillForm(!showBillForm)}
+              className="flex items-center gap-2 px-6 py-3 bg-naro-navy text-white rounded-2xl font-black hover:bg-blue-800 transition-all shadow-xl shadow-blue-100"
+            >
+              {showBillForm ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+              {showBillForm ? 'Annulla' : 'Nuova Bolletta'}
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {showBillForm && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden mb-12"
+              >
+                <form onSubmit={handleAddBill} className="bg-white p-8 rounded-3xl border-2 border-slate-100 shadow-2xl grid md:grid-cols-4 gap-6 items-end">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1">Fornitore / Ente</label>
+                    <input 
+                      required
+                      type="text" 
+                      placeholder="es. Enel, Acquedotto..."
+                      className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-bold focus:ring-2 focus:ring-blue-500 transition-all"
+                      value={newBill.fornitore}
+                      onChange={e => setNewBill({...newBill, fornitore: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1">Importo (€)</label>
+                    <input 
+                      required
+                      type="number" 
+                      step="0.01"
+                      placeholder="0.00"
+                      className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-bold focus:ring-2 focus:ring-blue-500 transition-all"
+                      value={newBill.importo}
+                      onChange={e => setNewBill({...newBill, importo: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest pl-1">Data Scadenza</label>
+                    <input 
+                      required
+                      type="date"
+                      className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-bold focus:ring-2 focus:ring-blue-500 transition-all"
+                      value={newBill.scadenza}
+                      onChange={e => setNewBill({...newBill, scadenza: e.target.value})}
+                    />
+                  </div>
+                  <button type="submit" className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 uppercase tracking-widest text-sm">
+                    Salva Record
+                  </button>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {bills.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {bills.map((bill) => {
+                const isOverdue = new Date(bill.scadenza) < new Date() && bill.stato === 'Da Pagare';
+                return (
+                  <motion.div 
+                    layout
+                    key={bill.id}
+                    className={`bg-white p-6 rounded-3xl border-2 transition-all relative overflow-hidden group ${
+                      bill.stato === 'Pagata' ? 'border-emerald-50 bg-emerald-50/20' : 
+                      isOverdue ? 'border-red-100 bg-red-50/20' : 'border-slate-50'
+                    }`}
+                  >
+                    {isOverdue && (
+                      <div className="absolute top-0 right-0 bg-red-600 text-white px-3 py-1 text-[8px] font-black uppercase tracking-tighter rounded-bl-xl">
+                        SCADUTA
+                      </div>
+                    )}
+                    <div className="flex justify-between items-start mb-4">
+                      <div className={`p-3 rounded-2xl ${bill.stato === 'Pagata' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
+                        <CreditCard className="w-6 h-6" />
+                      </div>
+                      <button 
+                        onClick={() => handleDeleteBill(bill.id)}
+                        className="p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <Trash className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <h4 className="text-xl font-black text-slate-800 leading-none mb-1">{bill.fornitore}</h4>
+                    <p className="text-2xl font-black text-blue-600 mb-6">€{bill.importo}</p>
+
+                    <div className="flex items-center gap-2 mb-6">
+                      <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Scadenza: {new Date(bill.scadenza).toLocaleDateString('it-IT')}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${bill.stato === 'Pagata' ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`} />
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${bill.stato === 'Pagata' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                          {bill.stato}
+                        </span>
+                      </div>
+                      <button 
+                        onClick={() => handleUpdateStatus(bill.id, bill.stato)}
+                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                          bill.stato === 'Pagata' ? 'bg-slate-100 text-slate-400' : 'bg-emerald-600 text-white shadow-lg shadow-emerald-100 hover:bg-emerald-700'
+                        }`}
+                      >
+                        {bill.stato === 'Pagata' ? 'Segna Da Pagare' : 'Segna Pagata'}
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="bg-white p-20 rounded-[40px] border-4 border-dashed border-slate-100 text-center">
+              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <History className="w-10 h-10 text-slate-200" />
+              </div>
+              <h3 className="text-xl font-black text-slate-800 uppercase tracking-tighter mb-2">Nessun Archivio Spese</h3>
+              <p className="text-slate-400 font-medium max-w-xs mx-auto">Aggiungi la tua prima bolletta per monitorare le scadenze e ricevere alert personalizzati.</p>
+            </div>
+          )}
+          
+          <div className="mt-12 bg-amber-50 rounded-3xl p-6 border-2 border-amber-100 flex gap-4">
+            <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-6 h-6 text-amber-600" />
+            </div>
+            <div>
+              <h4 className="text-sm font-black text-amber-900 uppercase tracking-widest mb-1">Privacy Totale Cloud-Local</h4>
+              <p className="text-xs text-amber-800 leading-relaxed">
+                Le informazioni sulle tue bollette sono salvate esclusivamente nel tuo storage locale crittografato. Il sistema di Alert agisce lato client: riceverai notifiche sulla campana in alto solo in base ai dati inseriti qui.
+              </p>
+            </div>
           </div>
         </div>
       </section>

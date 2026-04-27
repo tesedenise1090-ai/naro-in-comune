@@ -97,7 +97,9 @@ const STORAGE_KEYS = {
   REPORT_DRAFT: 'civica_report_draft',
   AUDIT_LOG: 'civica_audit_log',
   SYSTEM_CONFIG: 'civica_system_config',
-  PROTOCOL_COUNTER: 'civica_protocol_counter'
+  PROTOCOL_COUNTER: 'civica_protocol_counter',
+  BILLS: 'civica_bills',
+  NOTIFICATIONS: 'civica_notifications'
 };
 
 export interface AuditEntry {
@@ -190,6 +192,8 @@ export const StorageService = {
     }
     if (!localStorage.getItem(STORAGE_KEYS.AUDIT_LOG)) localStorage.setItem(STORAGE_KEYS.AUDIT_LOG, JSON.stringify([]));
     if (!localStorage.getItem(STORAGE_KEYS.PROTOCOL_COUNTER)) localStorage.setItem(STORAGE_KEYS.PROTOCOL_COUNTER, "123");
+    if (!localStorage.getItem(STORAGE_KEYS.BILLS)) localStorage.setItem(STORAGE_KEYS.BILLS, JSON.stringify([]));
+    if (!localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS)) localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify([]));
   },
 
   getNextProtocol: () => {
@@ -207,6 +211,8 @@ export const StorageService = {
   getCategories: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.CATEGORIES) || '[]'),
   getEntities: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.ENTITIES) || '[]'),
   getReports: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.REPORTS) || '[]'),
+  getBills: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.BILLS) || '[]'),
+  getNotifications: () => JSON.parse(localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS) || '[]'),
   getAllSignatures: (petitionId?: number) => {
     const all = JSON.parse(localStorage.getItem(STORAGE_KEYS.ALL_SIGNATURES) || '[]');
     return petitionId ? all.filter((s: any) => s.petitionId === petitionId) : all;
@@ -225,7 +231,7 @@ export const StorageService = {
       action,
       entityType,
       entityId,
-      metadata
+      metadata: metadata || null
     };
     
     // Local Save
@@ -763,6 +769,81 @@ export const StorageService = {
     const updatedReports = reports.filter((r: any) => r.id !== id);
     localStorage.setItem(STORAGE_KEYS.REPORTS, JSON.stringify(updatedReports));
     return updatedReports;
+  },
+
+  // Bills Management
+  addBill: (bill: any) => {
+    const bills = StorageService.getBills();
+    const newBill = { 
+      ...bill, 
+      id: `BILL-${Date.now()}`,
+      createdAt: new Date().toISOString()
+    };
+    const updatedBills = [newBill, ...bills];
+    localStorage.setItem(STORAGE_KEYS.BILLS, JSON.stringify(updatedBills));
+    StorageService.logAction('CREATE', 'BILL', newBill.id, { amount: bill.importo, provider: bill.fornitore });
+    StorageService.checkBillScadenza(newBill);
+    return updatedBills;
+  },
+
+  updateBill: (updatedBill: any) => {
+    const bills = StorageService.getBills();
+    const updatedBills = bills.map((b: any) => b.id === updatedBill.id ? updatedBill : b);
+    localStorage.setItem(STORAGE_KEYS.BILLS, JSON.stringify(updatedBills));
+    StorageService.logAction('UPDATE', 'BILL', updatedBill.id, { status: updatedBill.stato });
+    StorageService.checkBillScadenza(updatedBill);
+    return updatedBills;
+  },
+
+  deleteBill: (id: string) => {
+    const bills = StorageService.getBills();
+    const updatedBills = bills.filter((b: any) => b.id !== id);
+    localStorage.setItem(STORAGE_KEYS.BILLS, JSON.stringify(updatedBills));
+    return updatedBills;
+  },
+
+  checkBillScadenza: (bill: any) => {
+    if (bill.stato === 'Da Pagare') {
+      const scadenza = new Date(bill.scadenza);
+      const oggi = new Date();
+      const diffTime = scadenza.getTime() - oggi.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 7) {
+        StorageService.addNotification({
+          type: 'alert',
+          title: 'Scadenza Bolletta',
+          message: `La bolletta di ${bill.fornitore} da €${bill.importo} scade fra ${diffDays} giorni.`,
+          relatedId: bill.id
+        });
+      }
+    }
+  },
+
+  // Notifications Management
+  addNotification: (notif: { type: 'alert' | 'info' | 'success', title: string, message: string, relatedId?: string }) => {
+    const notifs = StorageService.getNotifications();
+    const newNotif = {
+      ...notif,
+      id: `NOTIF-${Date.now()}`,
+      date: new Date().toISOString(),
+      read: false
+    };
+    const updatedNotifs = [newNotif, ...notifs];
+    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(updatedNotifs));
+    return updatedNotifs;
+  },
+
+  markNotificationAsRead: (id: string) => {
+    const notifs = StorageService.getNotifications();
+    const updatedNotifs = notifs.map((n: any) => n.id === id ? { ...n, read: true } : n);
+    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(updatedNotifs));
+    return updatedNotifs;
+  },
+
+  clearNotifications: () => {
+    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify([]));
+    return [];
   },
 
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
-import { ShieldAlert, Menu, X, Accessibility, Mic } from 'lucide-react';
-import { HashRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import { ShieldAlert, Menu, X, Accessibility, Mic, User, Bell, ChevronRight, Check } from 'lucide-react';
+import { HashRouter as Router, Routes, Route, Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
+import { format } from 'date-fns';
 import ScrollToTop from './components/ScrollToTop';
 import { StorageService } from './services/storage';
 import { useVoiceCommand } from './hooks/useVoiceCommand';
@@ -46,6 +47,8 @@ function AppContent() {
   const [categories, setCategories] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [isHighContrast, setIsHighContrast] = useState(false);
   const [voiceAssistantActive, setVoiceAssistantActive] = useState(false);
 
@@ -99,6 +102,7 @@ function AppContent() {
     setUserSignatures(StorageService.getUserSignatures());
     setCategories(StorageService.getCategories());
     setReports(StorageService.getReports());
+    setNotifications(StorageService.getNotifications());
   };
 
   const handleLogin = (role: 'citizen' | 'technician' | 'admin', userData?: any) => {
@@ -141,9 +145,7 @@ function AppContent() {
 
   const isActive = (path: string) => location.pathname === path ? 'text-blue-600' : '';
 
-  if (!isAuthenticated) {
-    return <LoginPortal onLogin={handleLogin} />;
-  }
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <div className={`min-h-screen font-sans flex flex-col transition-all duration-300 ${isHighContrast ? 'high-contrast' : 'bg-slate-50 text-slate-900'}`}>
@@ -210,6 +212,83 @@ function AppContent() {
               
               <div className="h-6 w-px bg-slate-300"></div>
 
+              {/* Centro Notifiche */}
+              <div className="relative">
+                <button 
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="p-2 bg-slate-100 text-slate-600 rounded-full hover:bg-white hover:shadow-md transition-all relative group"
+                >
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full animate-bounce">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                <AnimatePresence>
+                  {showNotifications && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute top-full right-0 mt-3 w-80 bg-white border border-slate-200 shadow-2xl rounded-2xl overflow-hidden z-[100]"
+                    >
+                      <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        <h4 className="text-xs font-black text-naro-navy uppercase tracking-widest">Notifiche Smart</h4>
+                        {unreadCount > 0 && (
+                          <button 
+                            onClick={() => { StorageService.clearNotifications(); refreshData(); }}
+                            className="text-[10px] font-bold text-slate-400 hover:text-red-500 uppercase"
+                          >
+                            Cancella
+                          </button>
+                        )}
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto">
+                        {notifications.length > 0 ? (
+                          notifications.map((n) => (
+                            <div 
+                              key={n.id} 
+                              onClick={() => { StorageService.markNotificationAsRead(n.id); refreshData(); }}
+                              className={`p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer group ${!n.read ? 'bg-blue-50/30' : ''}`}
+                            >
+                              <div className="flex gap-3">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                  n.type === 'alert' ? 'bg-red-100 text-red-600' : 
+                                  n.type === 'success' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'
+                                }`}>
+                                  {n.type === 'alert' ? <ShieldAlert className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-[11px] font-bold text-slate-800 leading-tight mb-0.5">{n.title}</p>
+                                  <p className="text-[10px] text-slate-500 leading-snug line-clamp-2">{n.message}</p>
+                                  <p className="text-[9px] text-slate-400 mt-1 font-mono">{format(new Date(n.date), 'dd/MM HH:mm')}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-8 text-center">
+                            <Bell className="w-8 h-8 text-slate-200 mx-auto mb-2" />
+                            <p className="text-xs text-slate-400 font-medium">Nessuna nuova notifica</p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-3 bg-slate-50 text-center border-t border-slate-100">
+                        <Link 
+                          to="/utility#sezione-bollette" 
+                          onClick={() => setShowNotifications(false)}
+                          className="text-[10px] font-bold text-naro-navy hover:underline uppercase tracking-wider"
+                        >
+                          Gestisci Bollette & Scadenze
+                        </Link>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <Link to="/segnalazione-guasti" className="px-5 py-2.5 bg-red-600 text-white rounded-xl font-black hover:bg-red-700 transition-all shadow-lg shadow-red-200 flex items-center text-sm">
                 <ShieldAlert className="w-4 h-4 mr-2" /> Segnala Criticità
               </Link>
@@ -220,6 +299,28 @@ function AppContent() {
               >
                 {isAdmin ? 'Esci Admin' : 'Area Admin'}
               </button>
+
+              <div className="h-6 w-px bg-slate-300"></div>
+
+              {isAuthenticated ? (
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col items-end">
+                    <span className="text-[10px] font-black text-naro-navy leading-none uppercase">Profilo Attivo</span>
+                    <span className="text-xs font-bold text-slate-600 truncate max-w-[100px]">{currentUser?.nome || 'Cittadino'}</span>
+                  </div>
+                  <button 
+                    onClick={handleLogout}
+                    className="p-2 bg-slate-100 text-slate-600 rounded-full hover:bg-red-50 hover:text-red-600 transition-colors"
+                    title="Logout"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <Link to="/login" className="px-4 py-2 bg-naro-navy text-white rounded-lg text-sm font-bold hover:opacity-90 transition-all flex items-center gap-2">
+                  <User className="w-4 h-4" /> Accedi
+                </Link>
+              )}
             </nav>
 
             {/* Mobile Menu Button */}
@@ -262,6 +363,17 @@ function AppContent() {
               <Link to="/segnalazione-guasti" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-bold text-red-600 bg-red-50 hover:bg-red-100">
                 Segnala Criticità
               </Link>
+              
+              {isAuthenticated ? (
+                <button onClick={handleLogout} className="block w-full text-left px-3 py-2 rounded-md text-base font-bold text-red-600 hover:bg-red-50">
+                  Logout ({currentUser?.nome || 'Cittadino'})
+                </button>
+              ) : (
+                <Link to="/login" onClick={closeMobileMenu} className="block w-full text-left px-3 py-2 rounded-md text-base font-bold text-naro-navy hover:bg-slate-50">
+                  Accedi al Portale
+                </Link>
+              )}
+
               <button onClick={handleAdminToggle} className="block w-full text-left px-3 py-2 rounded-md text-base font-bold text-slate-700 hover:bg-slate-50 border border-slate-200 mt-2">
                  {isAdmin ? 'Esci Admin' : 'Area Admin'}
               </button>
@@ -285,6 +397,9 @@ function AppContent() {
                 <Helmet><title>Dettaglio Notizia - NaroInComune</title></Helmet>
                 <NewsDetail news={news} onRefresh={refreshData} currentUser={currentUser} />
               </>
+            } />
+            <Route path="/login" element={
+              isAuthenticated ? <Navigate to="/" replace /> : <LoginPortal onLogin={handleLogin} />
             } />
             <Route path="/utility" element={
               <>
